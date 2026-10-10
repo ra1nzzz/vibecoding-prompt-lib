@@ -4574,13 +4574,30 @@ everyone; a portfolio is for one person.</pre><button class="copy" type="button"
   var ticking=false;
   function updateScrollspy(){
     var marker=Math.max(120,window.innerHeight*.16);
-    var active=entries[0];
-    entries.forEach(function(entry){if(entry.getBoundingClientRect().top<=marker){active=entry}});
+    // 取「覆盖标记线」的条目：其顶部在标记线上方、底部在标记线下方。
+    // 兜底：若所有条目底部都在标记线上方（滚到末尾），取最后一个。
+    var active=null;
+    for(var i=0;i<entries.length;i++){
+      var rect=entries[i].getBoundingClientRect();
+      if(rect.top<=marker&&rect.bottom>marker){active=entries[i];break}
+      if(rect.top<=marker){active=entries[i]}
+    }
+    if(!active){active=entries[entries.length-1]}
     if(active){setActive(active.id)}
     ticking=false;
   }
   function requestScrollspy(){if(!ticking){ticking=true;window.requestAnimationFrame(updateScrollspy)}}
-  if(entries.length){setActive(entries[0].id);updateScrollspy();window.addEventListener('scroll',requestScrollspy,{passive:true});window.addEventListener('resize',requestScrollspy)}
+  if(entries.length){
+    setActive(entries[0].id);updateScrollspy();
+    window.addEventListener('scroll',requestScrollspy,{passive:true});
+    window.addEventListener('resize',requestScrollspy);
+    // 兜底：惯性滑动 / 某些 WebView 下 scroll 事件可能不触发，
+    // 用定时低频轮询保证高亮与目录文字最终会跟上。
+    setInterval(updateScrollspy,400);
+    // 锚点跳转 / 加载完成后再校准一次（hash 跳转发生在脚本执行之后）
+    window.addEventListener('hashchange',function(){setTimeout(updateScrollspy,60)});
+    window.addEventListener('load',function(){setTimeout(updateScrollspy,60)});
+  }
 })();
 </script>
 </body>
