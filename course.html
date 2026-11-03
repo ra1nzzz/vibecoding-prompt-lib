@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>LLM 入门课：Karpathy 两小时讲座精读 | 弈韬 Vibecoding 灵感与提示词库</title>
+<meta name="description" content="Andrej Karpathy 两小时 LLM 入门讲座的中文要点提炼，按章节整理，配原始幻灯片与实操截图。">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
+:root{color-scheme:light dark;--bg:#f3f4f1;--paper:#fff;--ink:#171814;--muted:#62665d;--line:#d8dbd3;--accent:#ef5b2a;--soft:#ffe5d7;--code:#171a18;--codeink:#f7f6ef;--shadow:0 16px 40px rgba(26,31,23,.08)}
+@media(prefers-color-scheme:dark){:root{--bg:#111310;--paper:#1a1d18;--ink:#f1f3ed;--muted:#aeb3a8;--line:#343a31;--accent:#ff7546;--soft:#492519;--code:#080a08;--codeink:#f4f6f0;--shadow:0 18px 44px rgba(0,0,0,.28)}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans SC",sans-serif;line-height:1.7}.page{width:min(1080px,calc(100% - 32px));margin:auto}
+.topbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar-in{display:flex;align-items:center;gap:14px;height:56px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;text-decoration:none;color:var(--ink)}
+.brand i{width:9px;height:9px;border-radius:3px;background:var(--accent);display:block}
+.topbar nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.topbar nav a{font-size:13px;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:8px;white-space:nowrap}
+.topbar nav a:hover{background:var(--soft);color:var(--accent)}
+.topbar nav a.on{color:var(--ink);font-weight:700;background:var(--soft)}
+.hero{padding:clamp(40px,7vw,84px) 0 38px;border-bottom:1px solid var(--line)}
+.eyebrow{display:flex;align-items:center;gap:9px;color:var(--accent);font:600 12px/1 "DM Mono",monospace;letter-spacing:.08em}
+.eyebrow:before{content:"";width:28px;height:2px;background:var(--accent)}
+.hero h1{max-width:840px;margin:20px 0 16px;font-size:clamp(32px,5.6vw,60px);line-height:1.1;letter-spacing:-.04em;font-weight:800}
+.lede{max-width:700px;margin:0;color:var(--muted);font-size:clamp(16px,2vw,19px)}
+.meta{display:flex;gap:10px 20px;flex-wrap:wrap;margin:24px 0 0;color:var(--muted);font-size:13px}
+.meta b{color:var(--ink);font-weight:700}
+.credit{margin-top:22px;padding:15px 18px;border:1px solid var(--line);border-radius:13px;background:var(--paper);font-size:13px;color:var(--muted);max-width:760px}
+.credit b{color:var(--ink)}
+.credit a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--soft)}
+.toc{position:sticky;top:56px;z-index:20;background:color-mix(in srgb,var(--bg) 93%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:11px 0}
+.toc-inner{display:flex;gap:7px;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}
+.toc a{flex:0 0 auto;font:500 12px/1 "DM Mono",monospace;color:var(--ink);text-decoration:none;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);transition:border-color .18s ease,color .18s ease}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.chapter{padding:clamp(38px,6vw,64px) 0;border-bottom:1px solid var(--line);scroll-margin-top:112px}
+.chapter:last-of-type{border-bottom:0}
+.ch-head{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.ch-no{color:var(--accent);font:600 13px/1 "DM Mono",monospace;letter-spacing:.06em;white-space:nowrap}
+.ch-time{color:var(--muted);font:500 12px/1 "DM Mono",monospace;white-space:nowrap}
+.chapter h2{margin:0 0 16px;font-size:clamp(24px,3.6vw,38px);line-height:1.22;letter-spacing:-.03em}
+.chapter h2 em{font-style:normal;color:var(--accent)}
+.summary{max-width:760px;margin:0 0 30px;color:var(--muted);font-size:16px}
+.summary strong{color:var(--ink)}
+.shot{margin:0 0 30px;border-radius:20px;overflow:hidden;background:#0d0e0c;box-shadow:var(--shadow)}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{padding:13px 18px;background:var(--paper);border:1px solid var(--line);border-top:0;border-radius:0 0 20px 20px;color:var(--muted);font-size:13px}
+.shot figcaption b{color:var(--ink)}
+.points{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:0 0 26px}
+.point{background:var(--paper);padding:20px 22px}
+.point h3{margin:0 0 8px;font-size:16px;line-height:1.4;display:flex;gap:10px;align-items:baseline}
+.point h3:before{content:"◆";color:var(--accent);font-size:10px;flex:0 0 auto}
+.point p{margin:0;color:var(--muted);font-size:14px}
+.point p+p{margin-top:10px}
+.point code,.note code{background:var(--code);color:var(--codeink);padding:2px 6px;border-radius:5px;font-family:"DM Mono",monospace;font-size:12px;overflow-wrap:anywhere}
+.note{margin:0 0 26px;padding:18px 20px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 14px 14px 0;background:var(--paper);font-size:14px;color:var(--muted)}
+.note b{color:var(--ink)}
+.terms{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.terms span{font:500 12px/1 "DM Mono",monospace;color:var(--accent);background:var(--soft);padding:8px 11px;border-radius:999px}
+footer{padding:30px 0 max(40px,env(safe-area-inset-bottom));color:var(--muted);font-size:12px}
+footer a{color:var(--ink)}
+@media(max-width:640px){
+.page{width:min(100% - 24px,620px)}
+.hero{padding-top:34px}
+.toc{top:56px;margin:0 -12px;padding:11px 12px}
+.ch-head{flex-wrap:wrap;gap:8px}
+.point{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="topbar"><div class="topbar-in">
+<a class="brand" href="index.html"><i></i>弈韬 Vibecoding</a>
+<nav>
+<a href="index.html">短视频灵感库</a>
+<a href="motion.html">Motion 术语库</a>
+<a class="on" href="course.html">LLM 入门课</a>
+</nav>
+</div></header>
+
+<header class="hero">
+<div class="eyebrow">DEEP DIVE COURSE</div>
+<h1>两小时搞懂大语言模型<br>Karpathy 入门讲座精读</h1>
+<p class="lede">Andrej Karpathy 用两个小时，从零讲清 LLM 是什么、怎么用、边界在哪里。这里按章节拆成 10 讲，每讲配原始幻灯片和中文要点提炼。</p>
+<div class="meta"><span>讲师 <b>Andrej Karpathy</b></span><span>时长 <b>2 小时 03 分</b></span><span>整理 <b>10 讲</b></span><span>截图 <b>12 张</b></span></div>
+<div class="credit">内容整理自 <b>Andrej Karpathy</b> 的公开讲座（<a href="https://x.com/0xkichiro/status/2115474764672225585" target="_blank" rel="noopener">原视频 ↗</a>）。幻灯片与界面截图为原视频画面。受版权限制，本页只做章节框架与要点提炼，不放完整讲稿；引用控制在单作品 50 词以内。</div>
+</header>
+
+<nav class="toc"><div class="toc-inner">
+<a href="#c1">01 一句话定义</a>
+<a href="#c2">02 预训练与后训练</a>
+<a href="#c3">03 上下文窗口</a>
+<a href="#c4">04 模型生态</a>
+<a href="#c5">05 思考模型</a>
+<a href="#c6">06 工具调用</a>
+<a href="#c7">07 Deep Research</a>
+<a href="#c8">08 多模态</a>
+<a href="#c9">09 记忆与自定义</a>
+<a href="#c10">10 心法总结</a>
+</div></nav>
+
+<main>
+
+<!-- 01 -->
+<section class="chapter" id="c1">
+<div class="ch-head"><span class="ch-no">01</span><span class="ch-time">00:00 – 04:00</span></div>
+<h2>一句话定义：一个 <em>1TB 的有损压缩包</em></h2>
+<p class="summary">Karpathy 给 LLM 下的第一个定义，也是全场最重要的一句：<strong>大语言模型本质上是一个约 1TB 的、有损且概率性的「互联网压缩文件」</strong>。它不是数据库，不是计算器，也不是搜索引擎——你一直在跟一个压缩包说话。</p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-llm.jpg" alt="Excalidraw 白板：LLM 比喻为 1TB 有损压缩的互联网 zip 文件，附预训练与后训练说明"><figcaption><b>原始幻灯片</b> · 把 LLM 画成一个带笑脸的 zip 文件，旁边标注训练成本与上下文窗口</figcaption></figure>
+<div class="points">
+<div class="point"><h3>自包含的实体</h3><p>把语言模型想象成磁盘里的一个 1TB 文件，对应神经网络里一万亿个参数及它们的精确配置。这个实体唯一的功能是：生成序列中的下一个 token。</p></div>
+<div class="point"><h3>它默认什么都没有</h3><p>没有计算器，没有 Python 解释器，也不能浏览万维网。这些能力要靠工具调用额外接上，不是模型自带。</p></div>
+<div class="point"><h3>知识是有损的</h3><p>参数里存的是「世界知识」，但通常过时几个月——因为它读的是几个月前的互联网快照。这是后面「知识截止」问题的根源。</p></div>
+</div>
+<div class="note"><b>为什么要用压缩包打比方？</b>Zip 压缩会丢细节但保留整体结构，LLM 对互联网的「记忆」也是如此：宏观规律学得很好，具体细节（某天某条新闻、某个确切数字）经常含糊或编造。理解这个比喻，就理解了后面所有的幻觉问题。</div>
+</section>
+
+<!-- 02 -->
+<section class="chapter" id="c2">
+<div class="ch-head"><span class="ch-no">02</span><span class="ch-time">04:00 – 10:00</span></div>
+<h2>它是怎么练出来的：<em>预训练</em> 与 <em>后训练</em></h2>
+<p class="summary">一阶段啃下整个互联网，二阶段学会好好说话。<strong>两个阶段的成本差着一两个数量级</strong>，这也解释了为什么各家都在卷预训练，而普通用户能感受到的差别大多来自后训练。</p>
+<div class="points">
+<div class="point"><h3>预训练 pre-training</h3><p>约 1000 万美元、耗时 3 个月，在互联网文档上训练。产出的是「世界知识」和一个会续写文本的基座。</p></div>
+<div class="point"><h3>后训练 post-training</h3><p>成本低得多，用 SFT（监督微调）、RLHF（基于人类反馈的强化学习）、RL 在对话数据上打磨。产出的是「助手风格」——你现在感受到的礼貌、结构化、愿意帮忙，全是这一阶段的成果。</p></div>
+<div class="point"><h3>两半合在一个产物里</h3><p>你默认正在交互的，是一个把这两部分都整合好的单一实体。知识来自预训练，语气和对话能力来自后训练。</p></div>
+</div>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-train.jpg" alt="Claude 界面：右侧 Artifacts 预览亚当·斯密经济理论互动抽认卡应用"><figcaption><b>后训练的直观体现</b> · Claude 听完一句话就生成可交互的抽认卡应用，这是「助手风格 + 工具调用」叠加的结果</figcaption></figure>
+</section>
+
+<!-- 03 -->
+<section class="chapter" id="c3">
+<div class="ch-head"><span class="ch-no">03</span><span class="ch-time">10:00 – 22:00</span></div>
+<h2>上下文窗口：模型的<em>工作记忆</em></h2>
+<p class="summary">点「新建对话」时，模型开启一条一维 token 序列。你写 token，回车后控制权交给模型，模型输出自己的 token，遇到「我说完了」这个特殊 token 再把控制权还给你。<strong>这条不断增长的序列就是 context window。</strong></p>
+<div class="terms"><span>tokens</span><span>context window</span><span>New chat</span><span>工作记忆</span></div>
+<div class="points">
+<div class="point"><h3>它不是无限长的笔记本</h3><p>窗口里的 token 越多，模型生成下一个 token 时就越容易被前面的内容分散注意力，准确率和表现都会下降。</p></div>
+<div class="point"><h3>token 越多，越慢越贵</h3><p>涨幅不大但确实存在：计算下一个 token 的成本随 token 数量上升，模型会稍微变慢。</p></div>
+<div class="point"><h3>把上下文当宝贵资源</h3><p>不要用无关信息塞满它，尽量保持精简。长对话跑到后面「变笨」，很多时候不是模型退化，是你把它的工作记忆占满了。</p></div>
+</div>
+<div class="note"><b>实操建议：</b>一个话题聊到开始跑偏，就开新对话重讲需求，而不是在一条几百轮的对话里继续纠偏。<b>清理上下文，是最便宜的提效手段。</b></div>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-ctx.jpg" alt="Excalidraw 白板：上下文窗口长条上分布 tokens 方块，标注 New chat 与 tiktokenizer 链接"><figcaption><b>上下文窗口长这样</b> · 一条水平长条就是 context window，上面的小方块是 tokens，左侧 New chat 是起点</figcaption></figure>
+</section>
+
+<!-- 04 -->
+<section class="chapter" id="c4">
+<div class="ch-head"><span class="ch-no">04</span><span class="ch-time">22:00 – 36:00</span></div>
+<h2>模型生态：别只用一个，<em>建个委员会</em></h2>
+<p class="summary">ChatGPT、Gemini、Copilot、Claude、Grok、Perplexity、DeepSeek、Le Chat——同一个问题喂给多个模型，交叉验证。Karpathy 把这叫他的 <strong>LLM 委员会</strong>。</p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-llms.jpg" alt="Grok 3 欢迎页，显示 Good morning, Andrej Karpathy 与 DeepSearch、Think、Research 等功能入口"><figcaption><b>各家界面长得不一样，能力项也不一样</b> · Grok 3 的欢迎页把 DeepSearch、Think、Research、Analyze Data 直接铺在输入框下方</figcaption></figure>
+<div class="points">
+<div class="point"><h3>确认自己用的是最新版</h3><p>界面左上角一般有模型选择器，付费升级才能拿到更先进的档位。别用 Grok 2 提问却以为在跟 Grok 3 对话。</p></div>
+<div class="point"><h3>同题多投</h3><p>把同一个问题丢给好几个不同价位、不同厂商的模型，看它们各自怎么答。分歧点往往就是要你自己判断的地方。</p></div>
+<div class="point"><h3>不同模型工具权限不同</h3><p>这是下一章的关键伏笔：有的模型能调 Python，有的只能靠心算——遇到数学和代码，结果会差很远。</p></div>
+</div>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-grok.jpg" alt="Grok 3 界面：423534 乘以 3124 的乘法问题与回答"><figcaption><b>没有解释器的模型怎么做数学</b> · Grok 3 心算 423,534 × 3,124，加了千分位后反问「这是个很大的数字，你有特定用途吗」</figcaption></figure>
+</section>
+
+<!-- 05 -->
+<section class="chapter" id="c5">
+<div class="ch-head"><span class="ch-no">05</span><span class="ch-time">36:00 – 48:00</span></div>
+<h2>思考模型：什么时候值得<em>让它多想一会儿</em></h2>
+<p class="summary">各厂商陆续推出了 thinking model。它们在数学、代码这类难题上明显更准，但日常问题让它想一分钟纯属浪费。<strong>Karpathy 自己平时默认用 non-thinking model，要质量时才切换。</strong></p>
+<div class="terms"><span>thinking model</span><span>non-thinking model</span><span>Think 开关</span></div>
+<div class="points">
+<div class="point"><h3>难题才值得想</h3><p>数学、代码、多步推理——这类问题 thinking model 能提升准确率。旅行建议、写文案、日常问答，没必要。</p></div>
+<div class="point"><h3>怎么开</h3><p>以 Grok 为例：输入框下方有 Think 开关，先打开再点发送，底层就会切到思考模型。各家的叫法和位置不同，但都有这个选择器。</p></div>
+<div class="point"><h3>顺带看它想什么</h3><p>OpenAI 不会完整展示思考过程，只给一份简略的思考摘要。这份摘要有时候比答案更能说明它卡在哪。</p></div>
+</div>
+</section>
+
+<!-- 06 -->
+<section class="chapter" id="c6">
+<div class="ch-head"><span class="ch-no">06</span><span class="ch-time">48:00 – 58:00</span></div>
+<h2>工具调用：从<em>聊天</em>到<em>干活</em></h2>
+<p class="summary">这是整场讲座最实用的一章。LLM 一旦接上工具，就从「会说话的压缩包」变成「能办事的代理」。<strong>你要特别留意手上每个模型到底有哪些工具</strong>——权限不同，结果天差地别。</p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-tools.jpg" alt="Cursor 编辑器界面，AI Composer 已完成 React 井字棋游戏并提交 Git"><figcaption><b>工具调用的极端形态</b> · Cursor 的 Composer：一句话需求 → 改三个文件 → 直接 Git 提交</figcaption></figure>
+<div class="points">
+<div class="point"><h3>三类核心工具</h3><p>互联网搜索 / 深度研究、Python 解释器（跑代码做计算）、以及各家自研的形态——ChatGPT 的 Advanced Data Analysis、Claude 的 Artifacts、Cursor 的 Composer。</p></div>
+<div class="point"><h3>有解释器和没解释器，是两种模型</h3><p>Karpathy 现场对比：ChatGPT 正确调用编程语言算出了乘法，Grok 3 没有 Python 权限、纯靠心算，结果居然也非常接近。但遇到更复杂的题，差距就会拉开。</p></div>
+<div class="point"><h3>让模型写代码，而不是自己心算</h3><p>凡是涉及精确计算的题，先问它「你能不能写段代码算一下」。这是性价比最高的一招。</p></div>
+</div>
+</section>
+
+<!-- 07 -->
+<section class="chapter" id="c7">
+<div class="ch-head"><span class="ch-no">07</span><span class="ch-time">58:00 – 1:15:00</span></div>
+<h2>Deep Research：<em>联网搜索 + 深度思考</em></h2>
+<p class="summary">Karpathy 称之为「特别酷但被严重低估」的功能。<strong>本质上就是联网搜索叠加长时间思考</strong>，模型自己跑几十分钟，查几十个来源，吐出一份带引用的报告。</p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-deepresearch.jpg" alt="ChatGPT 界面，输入框内是关于 CaAKG 与长寿关系的详细提问"><figcaption><b>典型用例</b> · 「Bryan Johnson 配方里的 CaAKG 为什么可能和长寿有关」——一个需要查论文的问题</figcaption></figure>
+<div class="points">
+<div class="point"><h3>门槛与产出</h3><p>最早由 ChatGPT 作为 Pro 订阅的一部分推出（每月 200 美元档位）。一次运行会查阅几十个来源，给出结构化报告加参考文献。</p></div>
+<div class="point"><h3>现场对比</h3><p>同一个 CaAKG 问题，ChatGPT 思考五分钟、查阅 27 个来源；Perplexity 和 Grok 的报告更短、细节更少。ChatGPT 的报告提到了线虫、果蝇、小鼠中的研究与人体试验。</p></div>
+<div class="point"><h3>报告是初稿，不是结论</h3><p>哪怕它真的在查资料，也没法保证完全没有幻觉——任何内容在任何时候都可能是编造的。<strong>引用极其重要，要顺着引用去查原文。</strong></p></div>
+</div>
+<div class="note"><b>正确用法：</b>把 Deep Research 的报告当成「待读论文清单」而不是答案。它真正的价值是替你省下半天文献调研时间，并指给你该看哪几篇。</div>
+</section>
+
+<!-- 08 -->
+<section class="chapter" id="c8">
+<div class="ch-head"><span class="ch-no">08</span><span class="ch-time">1:15:00 – 1:45:00</span></div>
+<h2>多模态：不只<em>文字</em>，还有图像与声音</h2>
+<p class="summary">从读论文到看视频，LLM 的输入输出早已不止文字。<strong>Karpathy 现场演示了几个让阅读门槛骤降的用法。</strong></p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-multimodal.jpg" alt="Google NotebookLM 界面，已上传 Evo2.pdf 并生成摘要与 8 分 11 秒音频概览"><figcaption><b>读论文神器</b> · NotebookLM 上传 Evo 2 论文 PDF，自动生成摘要、8 分钟音频概览、学习指南与 FAQ</figcaption></figure>
+<div class="points">
+<div class="point"><h3>边读边问，记忆留存翻倍</h3><p>把整本书（如《国富论》）丢给 Claude，边读边当场提问。Karpathy 的体会是：对陌生领域的文档，这种用法让理解深度提升非常明显。</p></div>
+<div class="point"><h3>老文献尤其需要帮手</h3><p>1776 年的文本，连最基础的语言习惯都得靠解释。LLM 让很多原本读不动的内容变得可及。</p></div>
+<div class="point"><h3>视觉能力还能这么用</h3><p>上传一张补充剂营养成分表让它转录；开着摄像头让它认书架上的书、看《指环王》地图、读 CO₂ 检测仪读数（713 ppm 属正常室内水平）。</p></div>
+<div class="point"><h3>视频输入是最新前沿</h3><p>原始幻灯片上，Video input（Advanced Voice + video）被特意高亮——这是当时最新、大家还不太熟悉的能力。</p></div>
+</div>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-vision.jpg" alt="ChatGPT 生成的丛林白虎视频画面"><figcaption><b>视频输出</b> · Karpathy 现场让多个模型各生成一只丛林里的老虎，逐个对比风格与画质</figcaption></figure>
+</section>
+
+<!-- 09 -->
+<section class="chapter" id="c9">
+<div class="ch-head"><span class="ch-no">09</span><span class="ch-time">1:45:00 – 1:55:00</span></div>
+<h2>记忆与自定义：把模型<em>调成你的</em></h2>
+<p class="summary">最后一类功能，Karpathy 称之为「生活质量功能」——不提升智力，但大幅提升顺手程度。<strong>核心是三件事：记忆、自定义指令、自定义 GPT。</strong></p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-memory.jpg" alt="ChatGPT 界面，上传 Bryan Johnson Longevity Mix 营养成分表并要求转录"><figcaption><b>记忆的日常价值</b> · 它记得你的常用配方、常用问法，下次不用从头交代背景</figcaption></figure>
+<div class="points">
+<div class="point"><h3>Memory 记忆功能</h3><p>让模型跨对话记住你的偏好、背景、常用信息。不用每开一个新对话就重新自我介绍一遍。</p></div>
+<div class="point"><h3>Custom instructions 自定义指令</h3><p>用你喜欢的任何方式写一份长期生效的指令，之后每次对话都自动带上。这是零成本的个性化。</p></div>
+<div class="point"><h3>Custom GPTs 自定义 GPT</h3><p>把一套固定流程打包成一个专用入口。Karpathy 举的例子：截图韩剧字幕 → OCR → 翻译 → 再做单词级语法解析，三步全自动。</p></div>
+</div>
+<div class="note"><b>还有一层：</b>同样的功能在浏览器端和手机端 availability 经常不一致。你在电脑上能用的，手机上未必有——切换设备时要有心理准备。</div>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-custom.jpg" alt="ChatGPT GPTs 编辑器界面：为 KoreanCap 自定义 GPT 编写三步指令"><figcaption><b>自定义 GPT 的指令长这样</b> · KoreanCap 收到字幕截图后依次执行 OCR、整段英译、单词级解析（含罗马音、词义、词干、助词），每词一行</figcaption></figure>
+</section>
+
+<!-- 10 -->
+<section class="chapter" id="c10">
+<div class="ch-head"><span class="ch-no">10</span><span class="ch-time">1:55:00 – 2:03:00</span></div>
+<h2>收尾：一张图带走<em>整场讲座</em></h2>
+<p class="summary">最后 Karpathy 演示了「同一个 gradient check 报错喂给一堆模型」的横向对比——<strong>O1 Pro 想了一分钟才给出正确解法，而 Claude 3.5 Sonnet 作为非推理模型，也直接定位到了真正的问题。</strong>推理强度不是唯一变量，值得你自己试。</p>
+<figure class="shot"><img loading="lazy" decoding="async" src="assets/kp-cover.jpg" alt="Excalidraw 完整白板：LLM 市场生态、核心比喻、训练成本、交互流程、生活质量功能与多模态总览"><figcaption><b>全场知识总图</b> · 左上市场生态，中间核心比喻与训练原理，左下交互流程与工具使用，右下生活质量功能与多模态能力</figcaption></figure>
+<div class="points">
+<div class="point"><h3>LLM 是个压缩包</h3><p>知识有损、会过时、细节会编。所有使用习惯都该从这个前提出发。</p></div>
+<div class="point"><h3>上下文是宝贵资源</h3><p>它是模型的工作记忆，塞满会降智。跑偏就开新对话。</p></div>
+<div class="point"><h3>工具决定上限</h3><p>先问「这个模型有没有 Python、能不能联网」。没有工具的模型，遇到计算和时效性问题就是另一回事。</p></div>
+<div class="point"><h3>别只用一个模型</h3><p>建你的 LLM 委员会，同题多投，分歧处自己判断。</p></div>
+<div class="point"><h3>引用是生命线</h3><p>凡是带引用出来的内容，都要顺着引用回查原文。报告是初稿，不是结论。</p></div>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>内容整理自 Andrej Karpathy 公开讲座，幻灯片与界面截图为原视频画面。引用受单作品 50 词限制，仅作章节框架与要点提炼。</p>
+<p><a href="index.html">短视频灵感库</a> · <a href="motion.html">Motion Prompt 术语库</a></p>
+</footer>
+
+</div>
+</body>
+</html>
